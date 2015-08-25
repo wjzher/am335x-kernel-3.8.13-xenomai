@@ -69,6 +69,8 @@
 #define GPMC_DEVICETYPE_NOR		0
 #define GPMC_DEVICETYPE_NAND		2
 #define GPMC_CONFIG_WRITEPROTECT	0x00000010
+#define GPMC_CONFIG_WAITPOLARITY0	(1 << 8)
+#define GPMC_CONFIG_WAITPOLARITY1	(1 << 9)
 #define WR_RD_PIN_MONITORING		0x00600000
 #define GPMC_IRQ_FIFOEVENTENABLE	0x01
 #define GPMC_IRQ_COUNT_EVENT		0x02
@@ -205,6 +207,7 @@ struct gpmc_settings {
 	u32 device_width;	/* device bus width (8 or 16 bit) */
 	u32 mux_add_data;	/* multiplex address & data */
 	u32 wait_pin;		/* wait-pin to be used */
+	u32 wait_pin_polarity;	/* wait-pin polarity to be set */
 	u32 clk_activation;	/* clock activation time */
 };
 

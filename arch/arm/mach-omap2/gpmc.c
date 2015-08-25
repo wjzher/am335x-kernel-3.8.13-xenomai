@@ -1223,6 +1223,29 @@ int gpmc_cs_program_settings(int cs, struct gpmc_settings *p)
 	return 0;
 }
 
+int gpmc_set_wait_polarity(int cs, struct gpmc_settings *p)
+{
+	if (p->wait_on_read || p->wait_on_write) {
+		u32 regval;
+		regval = gpmc_read_reg(GPMC_CONFIG);
+		if (p->wait_pin == 0) {
+			if (p->wait_pin_polarity) {
+				regval |= GPMC_CONFIG_WAITPOLARITY0;
+			} else {
+				regval &= ~GPMC_CONFIG_WAITPOLARITY0;
+			}
+		} else if (p->wait_pin == 1) {
+			if (p->wait_pin_polarity) {
+				regval |= GPMC_CONFIG_WAITPOLARITY1;
+			} else {
+				regval &= ~GPMC_CONFIG_WAITPOLARITY1;
+			}
+		}
+		gpmc_write_reg(GPMC_CONFIG, regval);
+	}
+	return 0;
+}
+
 #ifdef CONFIG_OF
 static struct of_device_id gpmc_dt_ids[] = {
 	{ .compatible = "ti,omap2420-gpmc" },
@@ -1269,6 +1292,7 @@ void gpmc_read_settings_dt(struct device_node *np, struct gpmc_settings *p)
 							"gpmc,wait-on-read");
 		p->wait_on_write = of_property_read_bool(np,
 							 "gpmc,wait-on-write");
+		of_property_read_u32(np, "gpmc,wait-pin-polarity", &p->wait_pin_polarity);
 		if (!p->wait_on_read && !p->wait_on_write)
 			pr_warn("%s: read/write wait monitoring not enabled!\n",
 				__func__);
@@ -1456,18 +1480,24 @@ static int gpmc_probe_generic_child(struct platform_device *pdev,
 			child->full_name);
 		return -ENODEV;
 	}
+	
+	dev_info(&pdev->dev, "%s: of property reg: %d\n", __func__, cs);
 
 	if (of_address_to_resource(child, 0, &res) < 0) {
 		dev_err(&pdev->dev, "%s has malformed 'reg' property\n",
 			child->full_name);
 		return -ENODEV;
 	}
+	dev_info(&pdev->dev, "%s: of address to resource: 0x%08x - 0x%08x name: %s flags: %08lx %p %p %p\n",
+		__func__, (unsigned int)res.start, (unsigned int)res.end,
+		res.name, res.flags, res.parent, res.sibling, res.child);
 
 	ret = gpmc_cs_request(cs, resource_size(&res), &base);
 	if (ret < 0) {
 		dev_err(&pdev->dev, "cannot request GPMC CS %d\n", cs);
 		return ret;
 	}
+	dev_info(&pdev->dev, "%s: gpmc_cs_request: 0x%08lx\n", __func__, base);
 
 	if (!of_property_read_bool(child, "gpmc,no-remap")) {
 		/*
@@ -1504,6 +1534,7 @@ static int gpmc_probe_generic_child(struct platform_device *pdev,
 		goto err;
 	}
 
+	gpmc_set_wait_polarity(cs, &gpmc_s);
 	gpmc_read_timings_dt(child, &gpmc_t);
 	gpmc_cs_set_timings(cs, &gpmc_t);
 
@@ -1544,7 +1575,9 @@ static int gpmc_probe_dt(struct platform_device *pdev)
 			ret = gpmc_probe_onenand_child(pdev, child);
 		else if (of_node_cmp(child->name, "nor") == 0 ||
 			   of_node_cmp(child->name, "ethernet") == 0 ||
-			   of_node_cmp(child->name, "camera") == 0)
+			   of_node_cmp(child->name, "camera") == 0 || 
+			   of_node_cmp(child->name, "fpga") == 0 ||
+			   of_node_cmp(child->name, "jl098") == 0)
 			ret = gpmc_probe_generic_child(pdev, child);
 
 		if (ret < 0) {

@@ -7,5 +7,6 @@ source "drivers/xenomai/testing/Kconfig"
 source "drivers/xenomai/can/Kconfig"
 source "drivers/xenomai/analogy/Kconfig"
 source "drivers/xenomai/ipc/Kconfig"
+source "drivers/xenomai/jl098b/Kconfig"
 
 endmenu

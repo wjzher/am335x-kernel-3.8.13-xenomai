@@ -39,6 +39,21 @@
 	};
 	gpmc_pins: pinmux_gpmc_pins {
 		pinctrl-single,pins = <
+			0x0	0x30	/* gpmc_ad0.gpmc_ad0 */
+			0x4	0x30	/* gpmc_ad1.gpmc_ad1 */
+			0x8	0x30	/* gpmc_ad2.gpmc_ad2 */
+			0xc	0x30	/* gpmc_ad3.gpmc_ad3 */
+			0x10	0x30	/* gpmc_ad4.gpmc_ad4 */
+			0x14	0x30	/* gpmc_ad5.gpmc_ad5 */
+			0x18	0x30	/* gpmc_ad6.gpmc_ad6 */
+			0x1c	0x30	/* gpmc_ad7.gpmc_ad7 */
+			0x70	0x30	/* gpmc_wait0.gpmc_wait0 */
+			/* 0x74	0x37 */	/* gpmc_wpn.gpio0_30 */
+			0x7c	0x10	/* gpmc_csn0.gpmc_csn0  */
+			0x90	0x10	/* gpmc_advn_ale.gpmc_advn_ale */
+			0x94	0x10	/* gpmc_oen_ren.gpmc_oen_ren */
+			0x98	0x10	/* gpmc_wen.gpmc_wen */
+			0x9c	0x10	/* gpmc_be0n_cle.gpmc_be0n_cle */
 			/* for fpga */
 			0x20	0x30	/* gpmc_ad8.gpmc_ad8 MODE0 | INPUT | PULLUP */
 			0x24	0x30	/* gpmc_ad9.gpmc_ad9 MODE0 | INPUT | PULLUP */
@@ -57,8 +72,10 @@
 			0x54	0x08	/* gpmc_a5.gpmc_a5 MODE0 */
 			0x58	0x08	/* gpmc_a6.gpmc_a6 MODE0 */
 			0x5C	0x08	/* gpmc_a7.gpmc_a7 MODE0 */
-			0x60	0x08	/* gpmc_a8.gpmc_a8 MODE0 */
+			/*0x60	0x08	 gpmc_a8.gpmc_a8 MODE0 */
+			/* for jl098b */
 			0x8C	0x32	/* gpmc_CLK.gpmc_wait1 MODE2 */
+			/* cs? ... */
 		>;
 	};
 	mmc1_pins: pinmux_mmc1_pins {
@@ -230,8 +247,86 @@
 	status = "okay";
 	pinctrl-names = "default";
 	pinctrl-0 = <&gpmc_pins>;
-	ranges = <1 0 0x10000000 0x1000000>,	/* CS1: 16MB for fpga */
+	ranges = <0 0 0x08000000 0x1000000>,	/* CS0: 16MB for NAND */
+			 <1 0 0x10000000 0x1000000>,	/* CS1: 16MB for fpga */
 			 <2 0 0x20000000 0x1000000>;	/* CS2: 16MB for jl-098 */
+	nand@0,0 {
+		reg = <0 0 0>;		/* CS0, offset 0 */
+		ti,nand-ecc-opt = "bch8";
+		/* ti,elm-id = <&elm>; */	/* unsupport */
+		nand-bus-width = <8>;
+		gpmc,device-width = <1>;
+		gpmc,sync-clk-ps = <0>;		/* timings */
+		gpmc,cs-on-ns = <0>;
+		gpmc,cs-rd-off-ns = <170>;
+		gpmc,cs-wr-off-ns = <170>;
+		gpmc,adv-on-ns = <50>;
+		gpmc,adv-rd-off-ns = <120>;
+		gpmc,adv-wr-off-ns = <120>;
+		gpmc,we-on-ns = <0>;
+		gpmc,we-off-ns = <90>;
+		gpmc,oe-on-ns = <0>;
+		gpmc,oe-off-ns = <90>;
+		gpmc,access-ns = <90>;
+		gpmc,rd-cycle-ns = <150>;
+		gpmc,wr-cycle-ns = <150>;
+		gpmc,wait-on-read = "true";
+		gpmc,wait-on-write = "true";
+		/* gpmc,wait-pin = <0>; */
+		gpmc,bus-turnaround-ns = <0>;
+		gpmc,cycle2cycle-delay-ns = <0>;
+		gpmc,clk-activation-ns = <0>;
+		gpmc,wait-monitoring-ns = <0>;
+		gpmc,wr-access-ns = <100>;
+		gpmc,wr-data-mux-bus-ns = <0>;
+		gpmc,device-nand = "true";
+		/* MTD partition table */
+		/* All SPL-* partitions are sized to minimal length
+		 * which can be independently programmable. For
+		 * NAND flash this is equal to size of erase-block */
+		#address-cells = <1>;
+		#size-cells = <1>;
+		partition@0 {
+			label = "NAND.SPL";
+			reg = <0x00000000 0x000020000>;		/* offset, size */
+		};
+		partition@1 {
+			label = "NAND.SPL.backup1";
+			reg = <0x00020000 0x00020000>;
+		};
+		partition@2 {
+			label = "NAND.SPL.backup2";
+			reg = <0x00040000 0x00020000>;
+		};
+		partition@3 {
+			label = "NAND.SPL.backup3";
+			reg = <0x00060000 0x00020000>;
+		};
+		partition@4 {
+			label = "NAND.u-boot-spl-os";
+			reg = <0x00080000 0x00040000>;
+		};
+		partition@5 {
+			label = "NAND.u-boot";
+			reg = <0x000C0000 0x00100000>;
+		};
+		partition@6 {
+			label = "NAND.u-boot-env";
+			reg = <0x001C0000 0x00020000>;
+		};
+		partition@7 {
+			label = "NAND.u-boot-env.backup1";
+			reg = <0x001E0000 0x00020000>;
+		};
+		partition@8 {
+			label = "NAND.kernel";
+			reg = <0x00200000 0x00800000>;
+		};
+		partition@9 {
+			label = "NAND.file-system";
+			reg = <0x00A00000 0x0F600000>;
+		};
+	};
 	fpga@1,0 {
 		reg = <1 0 0x1000000>;		/* CS1, offset 0 */
 		bank-width = <2>;
@@ -255,7 +350,7 @@
 		#size-cells = <1>;
 	};
 	jl098@2,0 {
-		reg = <3 0 0x1000000>;		/* CS2, offset 0 */
+		reg = <2 0 0x1000000>;		/* CS2, offset 0 */
 		bank-width = <2>;
 		gpmc,device-width = <2>;
 		gpmc,sync-clk-ps = <0>;		/* timings */

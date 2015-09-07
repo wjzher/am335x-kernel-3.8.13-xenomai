@@ -75,7 +75,7 @@
 			/*0x60	0x08	 gpmc_a8.gpmc_a8 MODE0 */
 			/* for jl098b */
 			0x8C	0x32	/* gpmc_CLK.gpmc_wait1 MODE2 */
-			/* cs? ... */
+			0x84	0x08	/* gpmc_cscn2.gpmc_cscn2 MODE0 | OUTPUT */
 		>;
 	};
 	mmc1_pins: pinmux_mmc1_pins {
@@ -192,6 +192,15 @@
 			init-low;
 		};
 	};
+	jl098b {
+		compatible = "jl098b";
+		status = "okay";
+		pinctrl-names = "default";
+		pinctrl-0 = <&jl098b>;
+
+		int-gpios = <&gpio4 16 0x00>;
+		reset-gpios = <&gpio4 17 0x00>;
+	};
 };
 
 &cpsw_emac0 {
@@ -249,7 +258,7 @@
 	pinctrl-0 = <&gpmc_pins>;
 	ranges = <0 0 0x08000000 0x1000000>,	/* CS0: 16MB for NAND */
 			 <1 0 0x10000000 0x1000000>,	/* CS1: 16MB for fpga */
-			 <2 0 0x20000000 0x1000000>;	/* CS2: 16MB for jl-098 */
+			 <2 0 0x18000000 0x1000000>;	/* CS2: 16MB for jl-098 */
 	nand@0,0 {
 		reg = <0 0 0>;		/* CS0, offset 0 */
 		ti,nand-ecc-opt = "bch8";
@@ -364,13 +373,13 @@
 		gpmc,we-off-ns = <90>;
 		gpmc,oe-on-ns = <0>;
 		gpmc,oe-off-ns = <90>;
-		gpmc,access-ns = <60>;		/* read access time */
-		gpmc,rd-cycle-ns = <100>;
-		gpmc,wr-cycle-ns = <60>;
-		gpmc,wr-access-ns = <60>;
+		gpmc,access-ns = <90>;		/* read access time */
+		gpmc,rd-cycle-ns = <110>;
+		gpmc,wr-cycle-ns = <110>;
+		gpmc,wr-access-ns = <90>;
 		gpmc,wait-on-read = "true";
 		gpmc,wait-on-write = "true";
-		gpmc,wait-pin = <1>;
+		/* gpmc,wait-pin = <1>; */
 		gpmc,wait-pin-polarity = <1>;
 		gpmc,wait-monitoring-ns = <0>;
 		#address-cells = <1>;

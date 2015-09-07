@@ -39,22 +39,18 @@ MODULE_DEVICE_TABLE(of, jl098b_of_match);
 
 static void rt_jl098b_reset(struct rt_jl098b_info *info)
 {
-	printk("rt_jl098b_reset 0\n");
 	gpio_set_value(info->reset_pin, 0);
 	msleep(1);
-	printk("rt_jl098b_reset 1\n");
 	gpio_set_value(info->reset_pin, 1);
 }
 
 static int rt_jl098b_interrupt(rtdm_irq_t *irq_handle)
 {
-	static int i;
 	struct rt_jl098b_info *info;
 	struct irq_desc *desc;
 	struct irq_chip *chip;
 
 	info = rtdm_irq_get_arg(irq_handle, struct rt_jl098b_info);
-	printk("irq... %d\n", i++);
 	desc = irq_to_desc(info->irq);
 	chip = desc->irq_data.chip;
 	if (chip->irq_ack) {
@@ -70,12 +66,10 @@ static int rt_jl098b_irq_config(struct rt_jl098b_info *info)
 	struct platform_device *pdev = info->pdev;
 	struct irq_desc *desc = irq_to_desc(info->irq);
 	struct irq_chip *chip;
-	printk("irq config. 0\n");
 	if (desc == NULL) {
 		dev_err(&pdev->dev, "rt_jl098b_irq_config irq to desc failed\n");
 		return -1;
 	}
-	printk("irq config. 1\n");
 	// set up the irq type
 	chip = desc->irq_data.chip;
 	if (!chip || !chip->irq_set_type) {
@@ -83,15 +77,12 @@ static int rt_jl098b_irq_config(struct rt_jl098b_info *info)
 			chip ? (chip->name ? : "unknown") : "unknown");
 		return 0;
 	}
-	printk("irq config. 2\n");
 	//chip->irq_set_type(&desc->irq_data, IRQF_TRIGGER_FALLING);
 	// desc->handler = NULL??
 	irqd_set_trigger_type(&desc->irq_data, IRQF_TRIGGER_FALLING);
 	if (chip->irq_enable) {
 		chip->irq_enable(&desc->irq_data);
-		printk("irq config. x3\n");
 	} else {
-		printk("irq config. 3\n");
 		chip->irq_unmask(&desc->irq_data);
 	}
 	return 0;
@@ -101,20 +92,16 @@ static int rt_jl098b_irq_stop(struct rt_jl098b_info *info)
 {
 	struct platform_device *pdev = info->pdev;
 	struct irq_desc *desc = irq_to_desc(info->irq);
-	printk("irq stop.\n");
 	if (desc == NULL) {
 		dev_err(&pdev->dev, "rt_jl098b_irq_config irq to desc failed\n");
 		return -1;
 	}
 	if (desc->irq_data.chip->irq_disable) {
-		printk("irq stop. x1\n");
 		desc->irq_data.chip->irq_disable(&desc->irq_data);
 	} else {
-		printk("irq stop. 1\n");
 		desc->irq_data.chip->irq_mask(&desc->irq_data);
 	}
 	if (desc->irq_data.chip->irq_mask_ack) {
-		printk("irq stop. 2\n");
 		desc->irq_data.chip->irq_mask_ack(&desc->irq_data);
 	}
 	return 0;
@@ -172,14 +159,12 @@ static int rt_jl098b_ioctl_rt(struct rtdm_dev_context *context,
 	switch (request) {
 		case RT_JL098B_START:
 			// 实时中断注册
-			printk("RT_JL098B_START 0\n");
 			ret = rtdm_irq_request(&info->int_irq_handle, info->irq,
 				rt_jl098b_interrupt, /* RTDM_IRQTYPE_EDGE */0, "jl098b_int", info);
 			if (ret) {
 				dev_err(&info->pdev->dev, "rt_jl098_open: rtdm_irq_request int irq %d failed %d\n", info->irq, ret);
 				return ret;
 			}
-			printk("RT_JL098B_START 1\n");
 			rt_jl098b_irq_config(info);
 			break;
 		case RT_JL098B_WAIT_IRQ:
@@ -243,7 +228,6 @@ static int jl098b_probe(struct platform_device *pdev)
 		dev_warn(&pdev->dev,
 			"pins are not configured from the driver\n");
 	}
-	printk("begin register rtdm device\n");
 	// rt device register
 	// 实时驱动注册
 	if ((ret = rtdm_dev_register(&rt_jl098b_device)) < 0) {
@@ -251,7 +235,6 @@ static int jl098b_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	printk("begin get int pin, reset pin\n");
 	info = (struct rt_jl098b_info *)rt_jl098b_device.reserved.exclusive_context->dev_private;;
 	if (info == NULL) {
 		dev_err(&pdev->dev, "Failed to get info\n");
@@ -263,7 +246,6 @@ static int jl098b_probe(struct platform_device *pdev)
 
 	info->int_pin = of_get_named_gpio(pnode, "int-gpios", 0);
 	info->reset_pin = of_get_named_gpio(pnode, "reset-gpios", 0);
-	printk("int = %d, reset = %d\n", info->int_pin, info->reset_pin);
 	if (!gpio_is_valid(info->int_pin)) {
 		dev_err(&pdev->dev, "No int pin!\n");
 		goto err_no_gpio;
@@ -275,7 +257,6 @@ static int jl098b_probe(struct platform_device *pdev)
 
 	/* irq, gpio init */
 	info->irq = gpio_to_irq(info->int_pin);
-	printk("irq = %d\n", info->irq);
 	ret = gpio_request(info->int_pin, "jl098b-int");
 	if (ret) {
 		dev_err(&pdev->dev, "gpio request int-pin failed %d\n", ret);

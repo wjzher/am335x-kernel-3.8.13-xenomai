@@ -1456,18 +1456,24 @@ static int gpmc_probe_generic_child(struct platform_device *pdev,
 			child->full_name);
 		return -ENODEV;
 	}
+	
+	dev_info(&pdev->dev, "%s: of property reg: %d\n", __func__, cs);
 
 	if (of_address_to_resource(child, 0, &res) < 0) {
 		dev_err(&pdev->dev, "%s has malformed 'reg' property\n",
 			child->full_name);
 		return -ENODEV;
 	}
+	dev_info(&pdev->dev, "%s: of address to resource: 0x%08x - 0x%08x name: %s flags: %08lx %p %p %p\n",
+		__func__, (unsigned int)res.start, (unsigned int)res.end,
+		res.name, res.flags, res.parent, res.sibling, res.child);
 
 	ret = gpmc_cs_request(cs, resource_size(&res), &base);
 	if (ret < 0) {
 		dev_err(&pdev->dev, "cannot request GPMC CS %d\n", cs);
 		return ret;
 	}
+	dev_info(&pdev->dev, "%s: gpmc_cs_request: 0x%08lx\n", __func__, base);
 
 	if (!of_property_read_bool(child, "gpmc,no-remap")) {
 		/*
@@ -1544,7 +1550,9 @@ static int gpmc_probe_dt(struct platform_device *pdev)
 			ret = gpmc_probe_onenand_child(pdev, child);
 		else if (of_node_cmp(child->name, "nor") == 0 ||
 			   of_node_cmp(child->name, "ethernet") == 0 ||
-			   of_node_cmp(child->name, "camera") == 0)
+			   of_node_cmp(child->name, "camera") == 0 || 
+			   of_node_cmp(child->name, "fpga") == 0 ||
+			   of_node_cmp(child->name, "jl098") == 0)
 			ret = gpmc_probe_generic_child(pdev, child);
 
 		if (ret < 0) {

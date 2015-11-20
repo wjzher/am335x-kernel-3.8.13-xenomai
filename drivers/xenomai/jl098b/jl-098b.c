@@ -156,6 +156,9 @@ static int rt_jl098b_ioctl_rt(struct rtdm_dev_context *context,
 {
 	struct rt_jl098b_info *info = (struct rt_jl098b_info *)context->dev_private;
 	int ret;
+	rtdm_toseq_t timeout_seq;
+	nanosecs_rel_t event_timeout = 8 * 1000 * 1000;
+	
 	switch (request) {
 		case RT_JL098B_START:
 			// ÊµÊ±ÖĞ¶Ï×¢²á
@@ -168,12 +171,15 @@ static int rt_jl098b_ioctl_rt(struct rtdm_dev_context *context,
 			rt_jl098b_irq_config(info);
 			break;
 		case RT_JL098B_WAIT_IRQ:
-			ret = rtdm_event_wait(&info->irq_event);
+			rtdm_toseq_init(&timeout_seq, event_timeout);
+			// 8 ms timeout
+			ret = rtdm_event_timedwait(&info->irq_event,
+				event_timeout, &timeout_seq);
 			break;
 		default:
 			return -EINVAL;
 	}
-	return 0;
+	return ret;
 }
 
 static struct rtdm_device rt_jl098b_device = {

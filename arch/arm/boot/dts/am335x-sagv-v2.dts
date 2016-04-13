@@ -102,19 +102,19 @@
 		pinctrl-single,pins = <
 			0x160 0x31	/* spi0_cs1, MODE1 | PULLUP_EN | RXACTIVE */
 			0x164 0x01	/* lcd_enbkl eCAP0_in_PWM0_out, MODE1 */
+			0x1a0 0x17	/* mcasp0_aclkr GPIO3[18], OUTPUT_PULLUP | MODE7 --> UART3_DE */
 		>;
 	};
 	uart6_pins: pinmux_uart6_pins {
 		pinctrl-single,pins = <
 			0xC0 0x04	/* lcd_data8, MODE4 */
 			0xC4 0x34	/* lcd_data9, MODE4 | PULLUP_EN | RXACTIVE */
+			0x1ac 0x17	/* mcasp0_ahclkx GPIO3[21], OUTPUT_PULLUP | MODE7 --> UART5_DE */
 		>;
 	};
 	gpio_helper_pins: pinmux_gpio_helper_pins {
 		pinctrl-single,pins = <
 			0xe4 0x7	/* LCD_HSYNC GPIO2[23], OUTPUT | MODE7 --> USER LED */
-			0x1ac 0x17	/* mcasp0_ahclkx GPIO3[21], OUTPUT_PULLUP | MODE7 --> UART5_DE */
-			0x1a0 0x17	/* mcasp0_aclkr GPIO3[18], OUTPUT_PULLUP | MODE7 --> UART3_DE */
 			/*0x19C 0x17	 mcasp0_ahclkr GPIO3[17], OUTPUT_PULLUP | MODE7 --> JL098_RST */
 			/*0x1A8 0x17	 mcasp0_axr0 GPIO3[20],  | MODE7 --> JL098_INT */
 		>;
@@ -168,18 +168,6 @@
 			gpio = <&gpio3 23 0x00>;	/* gpio3 is gpio2, active_low = 0 */
 			output;
 			init-high;
-		};
-		uart3_de {
-			gpio-name = "uart3_de";
-			gpio = <&gpio4 18 0x00>;		/* gpio4 is gpio3, active_low = 0 */
-			output;
-			init-low;
-		};
-		uart5_de {
-			gpio-name = "uart5_de";
-			gpio = <&gpio4 21 0x00>;		/* gpio4 is gpio3, active_low = 0 */
-			output;
-			init-low;
 		};
 	};
 	jl098b {

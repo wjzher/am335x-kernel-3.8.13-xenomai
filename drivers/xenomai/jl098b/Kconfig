@@ -1,0 +1,9 @@
+menu "MECHATROLINK drivers"
+
+config XENO_DRIVERS_JL098B
+	depends on XENO_SKIN_RTDM && SOC_AM33XX
+	tristate "MECHATROLINK JL098B driver"
+	help
+	Real-time JL098B driver for AM335x
+
+endmenu

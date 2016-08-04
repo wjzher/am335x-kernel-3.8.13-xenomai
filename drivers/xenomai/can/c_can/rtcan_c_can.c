@@ -443,16 +443,17 @@ static void c_can_handle_lost_msg_obj(struct rtcan_device *dev,
 	rtcan_rcv(dev, &skb);
 }
 
-static int c_can_read_msg_object(struct rtcan_device *dev, int iface, int ctrl, struct rtcan_skb *skb)
+static int c_can_read_msg_object(struct rtcan_device *dev, int iface, int ctrl)
 {
 	u16 flags, data;
 	int i;
 	unsigned int val;
 	struct c_can_priv *priv = rtcan_priv(dev);
+	struct rtcan_skb _skb;
+	struct rtcan_skb *skb = &_skb;
 	struct rtcan_rb_frame *frame = &skb->rb_frame;
 
 	frame->can_dlc = get_can_dlc(ctrl & 0x0F);
-	skb->rb_frame_size = EMPTY_RB_FRAME_SIZE + CAN_ERR_DLC;
 
 	flags =	priv->read_reg(priv, C_CAN_IFACE(ARB2_REG, iface));
 	val = priv->read_reg(priv, C_CAN_IFACE(ARB1_REG, iface)) |
@@ -463,17 +464,20 @@ static int c_can_read_msg_object(struct rtcan_device *dev, int iface, int ctrl, 
 	else
 		frame->can_id = (val >> 18) & CAN_SFF_MASK;
 
-	if (flags & IF_ARB_TRANSMIT)
+	if (flags & IF_ARB_TRANSMIT) {
 		frame->can_id |= CAN_RTR_FLAG;
-	else {
+		skb->rb_frame_size = EMPTY_RB_FRAME_SIZE;
+	} else {
 		for (i = 0; i < frame->can_dlc; i += 2) {
 			data = priv->read_reg(priv,
 				C_CAN_IFACE(DATA1_REG, iface) + i / 2);
 			frame->data[i] = data;
 			frame->data[i + 1] = data >> 8;
 		}
+		skb->rb_frame_size = EMPTY_RB_FRAME_SIZE + frame->can_dlc;
 	}
-
+	
+	rtcan_rcv(dev, skb);
 	return 0;
 }
 
@@ -852,8 +856,6 @@ static int c_can_do_rx_poll(struct rtcan_device *dev)
 	struct c_can_priv *priv = rtcan_priv(dev);
 	u32 val = c_can_read_reg32(priv, C_CAN_INTPND1_REG);
 
-	struct rtcan_skb skb;
-
 	for (msg_obj = C_CAN_MSG_OBJ_RX_FIRST;
 			msg_obj <= C_CAN_MSG_OBJ_RX_LAST;
 			val = c_can_read_reg32(priv, C_CAN_INTPND1_REG),
@@ -881,7 +883,7 @@ static int c_can_do_rx_poll(struct rtcan_device *dev)
 				continue;
 
 			/* read the data from the message object */
-			c_can_read_msg_object(dev, 0, msg_ctrl_save, &skb);
+			c_can_read_msg_object(dev, 0, msg_ctrl_save);
 
 			if (msg_obj < C_CAN_MSG_RX_LOW_LAST)
 				c_can_mark_rx_msg_obj(dev, 0,
@@ -895,7 +897,6 @@ static int c_can_do_rx_poll(struct rtcan_device *dev)
 				c_can_activate_all_lower_rx_msg_obj(dev,
 						0, msg_ctrl_save);
 
-			rtcan_rcv(dev, &skb);
 			num_rx_pkts++;
 		}
 	}

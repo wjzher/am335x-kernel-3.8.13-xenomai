@@ -72,7 +72,13 @@
 			0x54	0x08	/* gpmc_a5.gpmc_a5 MODE0 */
 			0x58	0x08	/* gpmc_a6.gpmc_a6 MODE0 */
 			0x5C	0x08	/* gpmc_a7.gpmc_a7 MODE0 */
-			/*0x60	0x08	 gpmc_a8.gpmc_a8 MODE0 */
+			/* for profibus&profinet */
+			0x84	0x08	/* gpmc_cscn2.gpmc_cscn2 MODE0 | OUTPUT */
+			0x88	0x08	/* gpmc_cscn3.gpmc_cscn3 MODE0 | OUTPUT */
+			0x60	0x08	/* gpmc_a8.gpmc_a8 MODE0 */
+			0x64	0x08	/* gpmc_a9.gpmc_a9 MODE0 */
+			0x68	0x08	/* gpmc_a10.gpmc_a10 MODE0 */
+			0x6C	0x08	/* gpmc_a11.gpmc_a11 MODE0 */
 		>;
 	};
 	mmc1_pins: pinmux_mmc1_pins {
@@ -176,6 +182,7 @@
 	};
 };
 
+/*
 &cpsw_emac0 {
 	phy_id = <&davinci_mdio>, <0>;
 };
@@ -183,6 +190,7 @@
 &cpsw_emac1 {
 	phy_id = <&davinci_mdio>, <1>;
 };
+*/
 
 &mmc1 {
 	pinctrl-names = "default";
@@ -230,7 +238,9 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&gpmc_pins>;
 	ranges = <0 0 0x08000000 0x1000000>,	/* CS0: 16MB for NAND */
-			 <1 0 0x10000000 0x1000000>;	/* CS1: 16MB for fpga */
+			 <1 0 0x10000000 0x1000000>,	/* CS1: 16MB for fpga */
+			 <2 0 0x18000000 0x1000000>,	/* CS1: 16MB for PROFIBUS */
+			 <3 0 0x20000000 0x1000000>;	/* CS1: 16MB for PROFINET */
 	nand@0,0 {
 		reg = <0 0 0>;		/* CS0, offset 0 */
 		ti,nand-ecc-opt = "bch8";
@@ -310,6 +320,50 @@
 	};
 	fpga@1,0 {
 		reg = <1 0 0x1000000>;		/* CS1, offset 0 */
+		bank-width = <2>;
+		gpmc,device-width = <2>;
+		gpmc,sync-clk-ps = <0>;		/* timings */
+		gpmc,cs-on-ns = <0>;
+		gpmc,cs-rd-off-ns = <80>;
+		gpmc,cs-wr-off-ns = <70>;
+		gpmc,adv-on-ns = <0>;
+		gpmc,adv-rd-off-ns = <0>;
+		gpmc,adv-wr-off-ns = <0>;
+		gpmc,we-on-ns = <10>;
+		gpmc,we-off-ns = <70>;
+		gpmc,oe-on-ns = <10>;
+		gpmc,oe-off-ns = <70>;
+		gpmc,access-ns = <60>;
+		gpmc,rd-cycle-ns = <70>;
+		gpmc,wr-cycle-ns = <60>;
+		gpmc,wr-access-ns = <10>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+	profibus@2,0 {
+		reg = <2 0 0x1000000>;		/* CS1, offset 0 */
+		bank-width = <2>;
+		gpmc,device-width = <2>;
+		gpmc,sync-clk-ps = <0>;		/* timings */
+		gpmc,cs-on-ns = <0>;
+		gpmc,cs-rd-off-ns = <80>;
+		gpmc,cs-wr-off-ns = <70>;
+		gpmc,adv-on-ns = <0>;
+		gpmc,adv-rd-off-ns = <0>;
+		gpmc,adv-wr-off-ns = <0>;
+		gpmc,we-on-ns = <10>;
+		gpmc,we-off-ns = <70>;
+		gpmc,oe-on-ns = <10>;
+		gpmc,oe-off-ns = <70>;
+		gpmc,access-ns = <60>;
+		gpmc,rd-cycle-ns = <70>;
+		gpmc,wr-cycle-ns = <60>;
+		gpmc,wr-access-ns = <10>;
+		#address-cells = <1>;
+		#size-cells = <1>;
+	};
+	profinet@3,0 {
+		reg = <3 0 0x1000000>;		/* CS1, offset 0 */
 		bank-width = <2>;
 		gpmc,device-width = <2>;
 		gpmc,sync-clk-ps = <0>;		/* timings */

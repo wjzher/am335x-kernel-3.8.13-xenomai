@@ -1551,6 +1551,8 @@ static int gpmc_probe_dt(struct platform_device *pdev)
 		else if (of_node_cmp(child->name, "nor") == 0 ||
 			   of_node_cmp(child->name, "ethernet") == 0 ||
 			   of_node_cmp(child->name, "camera") == 0 || 
+			   of_node_cmp(child->name, "profibus") == 0 ||
+			   of_node_cmp(child->name, "profinet") == 0 ||
 			   of_node_cmp(child->name, "fpga") == 0 ||
 			   of_node_cmp(child->name, "jl098") == 0)
 			ret = gpmc_probe_generic_child(pdev, child);

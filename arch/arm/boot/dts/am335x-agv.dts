@@ -1,0 +1,109 @@
+/*
+ * Copyright (C) 2012 Texas Instruments Incorporated - http://www.ti.com/
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation.
+ */
+/dts-v1/;
+
+/include/ "am33xx.dtsi"
+
+/include/ "am335x-agv-common.dtsi"
+
+&cpu {
+	/*
+	 * To consider voltage drop between PMIC and SoC,
+	 * tolerance value is reduced to 2% from 4% and
+	 * voltage value is increased as a precaution.
+	 */
+	operating-points = <
+		/* kHz    uV */
+		1000000	1350000
+		800000	1300000
+		600000  1112000
+		300000   969000
+	>;
+};
+
+&i2c2 {
+	status = "disabled";
+};
+
+&am33xx_pinmux {
+	dcan0_pins: pinmux_dcan0_pins {
+		pinctrl-single,pins = <
+			0x178 0x12 	/* uart1_ctsn, SLEWCTRL_FAST | INPUT_PULLUP | MODE2 | TX */
+			0x17c 0x32	/* uart1_rtsn, SLEWCTRL_FAST | RECV_ENABLE | INPUT_PULLUP | MODE2 | RX */
+		>;
+	};
+	dcan1_pins: pinmux_dcan1_pins {
+		pinctrl-single,pins = <
+			0x168 0x12 	/* uart0_ctsn, SLEWCTRL_FAST | INPUT_PULLUP | MODE2 | TX */
+			0x16c 0x32	/* uart0_rtsn, SLEWCTRL_FAST | RECV_ENABLE | INPUT_PULLUP | MODE2 | RX */
+		>;
+	};
+	uart2_pins: pinmux_uart2_pins {
+		pinctrl-single,pins = <
+			0x180 0x30	/* uart1_rxd, MODE0 | PULLUP_EN | RXACTIVE */
+			0x184 0x0	/* uart1_txd, MODE0 */
+		>;
+	};
+	uart3_pins: pinmux_uart3_pins {
+		pinctrl-single,pins = <
+			0x150 0x31	/* spi0_clk, MODE1 | PULLUP_EN | RXACTIVE */
+			0x154 0x01	/* spi0_d0, MODE1 */
+		>;
+	};
+	uart4_pins: pinmux_uart4_pins {
+		pinctrl-single,pins = <
+			0x160 0x31	/* spi0_cs1, MODE1 | PULLUP_EN | RXACTIVE */
+			0x164 0x01	/* lcd_enbkl eCAP0_in_PWM0_out, MODE1 */
+			0x1a0 0x17	/* mcasp0_aclkr GPIO3[18], OUTPUT_PULLUP | MODE7 */
+		>;
+	};
+	uart6_pins: pinmux_uart6_pins {
+		pinctrl-single,pins = <
+			0xC0 0x04	/* lcd_data8, MODE4 | PULLUP_EN | RXACTIVE */
+			0xC4 0x34	/* lcd_data9, MODE4 */
+			0x1ac 0x17	/* mcasp0_ahclkx GPIO3[21], OUTPUT_PULLUP | MODE7 */
+		>;
+	};
+};
+
+&dcan0 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&dcan0_pins>;
+};
+
+&dcan1 {
+	status = "okay";
+	pinctrl-names = "default";
+	pinctrl-0 = <&dcan1_pins>;
+};
+
+&uart2 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart2_pins>;
+	status = "okay";
+};
+
+&uart3 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart3_pins>;
+	status = "okay";
+};
+
+&uart4 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart4_pins>;
+	status = "okay";
+};
+
+&uart6 {
+	pinctrl-names = "default";
+	pinctrl-0 = <&uart6_pins>;
+	status = "okay";
+};
+

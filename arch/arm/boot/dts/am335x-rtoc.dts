@@ -79,6 +79,8 @@
 			0x64	0x08	/* gpmc_a9.gpmc_a9 MODE0 */
 			0x68	0x08	/* gpmc_a10.gpmc_a10 MODE0 */
 			0x6C	0x08	/* gpmc_a11.gpmc_a11 MODE0 */
+			0x9C    0x08    /* gpmc_ben0 MODE0 */
+			0x78    0x08    /* gpmc_ben1 MODE0 */
 		>;
 	};
 	mmc1_pins: pinmux_mmc1_pins {
@@ -121,6 +123,13 @@
 			0x8C	0x7	/* gpmc_CLK.gpmc_wait1 GPIO2[1] MODE2, 24V ctrl */
 			0x1AC 0x7	/* MCASP0_AHCLKX GPIO3[21], OUTPUT | MODE7 --> USER LED */
 			0x1a0 0x17	/* mcasp0_aclkr GPIO3[18], OUTPUT_PULLUP | MODE7 --> UART3_DE */
+			/* profibus profinet pin */
+			0x190	0x17	/* MCASP0_ACLKX		GPIO3[14],	INPUT_PULLUP | MODE7 --> PROFI_IN0 */
+			0x194	0x17	/* MCASP0_FSX		GPIO3[15],	INPUT_PULLUP | MODE7 --> PROFI_IN1 */
+			0x198	0x17	/* MCASP0_AXR0		GPIO3[16],	INPUT_PULLUP | MODE7 --> PROFI_IN2 */
+			0x19c	0x17	/* MCASP0_AHCLKR	GPIO3[17],	INPUT_PULLUP | MODE7 --> PROFI_IN3 */
+			0x1b0	0x17	/* EVENT_INT0		GPIO0[19],	INPUT_PULLUP | MODE0 --> PROFI_INT0 */
+			0x1b4	0x17	/* EVENT_INT1		GPIO0[20],	INPUT_PULLUP | MODE0 --> PROFI_INT1 */
 		>;
 	};
 };
@@ -196,7 +205,7 @@
 	pinctrl-names = "default";
 	pinctrl-0 = <&mmc1_pins>;
 	bus-width = <0x4>;
-	cd-gpios = <&gpio4 14 0>; /* gpio3 is misnamed, 0 == GPIO_ACTIVE_HIGH */
+	cd-gpios = <&gpio4 19 0>; /* gpio3 is misnamed, 0 == GPIO_ACTIVE_HIGH */
 	cd-inverted;
 	status = "okay";
 	/* vmmc-supply = <&ldo4_reg>; */
@@ -239,8 +248,8 @@
 	pinctrl-0 = <&gpmc_pins>;
 	ranges = <0 0 0x08000000 0x1000000>,	/* CS0: 16MB for NAND */
 			 <1 0 0x10000000 0x1000000>,	/* CS1: 16MB for fpga */
-			 <2 0 0x18000000 0x1000000>,	/* CS1: 16MB for PROFIBUS */
-			 <3 0 0x20000000 0x1000000>;	/* CS1: 16MB for PROFINET */
+			 <2 0 0x18000000 0x1000000>,	/* CS2: 16MB for PROFIBUS */
+			 <3 0 0x1C000000 0x1000000>;	/* CS3: 16MB for PROFINET */
 	nand@0,0 {
 		reg = <0 0 0>;		/* CS0, offset 0 */
 		ti,nand-ecc-opt = "bch8";
@@ -341,7 +350,7 @@
 		#size-cells = <1>;
 	};
 	profibus@2,0 {
-		reg = <2 0 0x1000000>;		/* CS1, offset 0 */
+		reg = <2 0 0x1000000>;		/* CS2, offset 0 */
 		bank-width = <2>;
 		gpmc,device-width = <2>;
 		gpmc,sync-clk-ps = <0>;		/* timings */
@@ -363,7 +372,7 @@
 		#size-cells = <1>;
 	};
 	profinet@3,0 {
-		reg = <3 0 0x1000000>;		/* CS1, offset 0 */
+		reg = <3 0 0x1000000>;		/* CS3, offset 0 */
 		bank-width = <2>;
 		gpmc,device-width = <2>;
 		gpmc,sync-clk-ps = <0>;		/* timings */

@@ -117,6 +117,7 @@ dtb-$(CONFIG_ARCH_OMAP2PLUS) += omap2420-h4.dtb \
 	am335x-boneblack.dtb \
 	am335x-bonegreen.dtb \
 	am335x-agv.dtb \
+	am335x-agv-v2.dtb \
 	am335x-sagv.dtb \
 	am335x-sagv-v2.dtb \
 	am335x-rtoc.dtb \

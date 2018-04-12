@@ -1,0 +1,9 @@
+menu "AGV FPGA driver"
+
+config XENO_DRIVERS_FPGA
+	depends on XENO_SKIN_RTDM && SOC_AM33XX
+	tristate "AGV FPGA driver"
+	help
+	Real-time fpga driver for AM335x
+
+endmenu
